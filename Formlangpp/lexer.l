@@ -1,10 +1,11 @@
 %{
-#include "formlang.tab.h"
+#include "parser.tab.h"
 #include <stdlib.h>
 #include <string.h>
+
 %}
 
-%%  
+%%
 
 "form"              { return FORM; }
 "meta"              { return META; }
@@ -14,7 +15,6 @@
 "then"              { return THEN; }
 "error"             { return ERROR; }
 
- 
 "text"              { return TEXT; }
 "textarea"          { return TEXTAREA; }
 "number"            { return NUMBER_TYPE; }
@@ -26,16 +26,15 @@
 "password"          { return PASSWORD; }
 "file"              { return FILE_FIELD; }
 
-"required"      { return REQUIRED; }
-"pattern"       { return PATTERN; }
-"default"       { return DEFAULT; }
-"min"           { return MIN; }
-"max"           { return MAX; }
-"rows"          { return ROWS; }
-"cols"          { return COLS; }
-"accept"        { return ACCEPT; }
-"options"       { return OPTIONS; }
-
+"required"          { return REQUIRED; }
+"pattern"           { return PATTERN; }
+"default"           { return DEFAULT; }
+"min"               { return MIN; }
+"max"               { return MAX; }
+"rows"              { return ROWS; }
+"cols"              { return COLS; }
+"accept"            { return ACCEPT; }
+"options"           { return OPTIONS; }
 
 "=="                { return EQ; }
 "!="                { return NEQ; }
@@ -51,15 +50,16 @@
 "]"                 { return RBRACKET; }
 ","                 { return COMMA; }
 
-[0-9]+              { yylval.num = atoi(yytext); return NUMBER; }
-\"([^\"\n]*)\"      { yylval.str = strdup(yytext); return STRING; }
-[a-zA-Z_][a-zA-Z0-9_]* { yylval.str = strdup(yytext); return IDENTIFIER; }
+ [0-9]+              { yylval.num = atoi(yytext); return NUMBER; }
+ \"([^\"\n]*)\"      { yylval.str = strdup(yytext); return STRING; }
+ [a-zA-Z_][a-zA-Z0-9_]* { yylval.str = strdup(yytext); return IDENTIFIER; }
 
-[ \t\r\n]+          { /* skip */ }
+ \n                  { yylineno++; }
+ [ \t\r]+            { }
 
-.                   { printf("❗ Unexpected character: %s\n", yytext); }
+ .                   { printf("Unexpected character: %s at line %d\n", yytext, yylineno); }
 
-%%        
+%%
 
 int yywrap() {
     return 1;

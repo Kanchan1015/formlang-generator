@@ -1,0 +1,17 @@
+form brokenForm {
+  meta
+    title = "Broken Form"
+    description = "Oops, missing semicolon"
+
+  section badSection {
+    text name required pattern = "^[0-9+$";   // invalid regex
+    email emailField required pattern = ^\\S+@\\S+\\.\\S+$;  // pattern missing quotes
+    numb age min = 10;   // invalid field type "numb"
+    checkbox agree = true;   // invalid use of default
+  }
+
+  validate 
+    if age < {
+      error "Invalid validation block";
+    }
+}

@@ -66,19 +66,22 @@
 
 
 /* First part of user prologue.  */
-#line 1 "formlang.y"
+#line 3 "parser.y"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+extern int yylineno;
 
 int yylex(void);
 int yyerror(const char *s);
 
 char current_field_type[50];
 char attributes_buffer[1024];
+char textarea_default[256] = "";
 
-#line 82 "formlang.tab.c"
+#line 85 "parser.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -106,13 +109,13 @@ char attributes_buffer[1024];
 # undef YYERROR_VERBOSE
 # define YYERROR_VERBOSE 1
 #else
-# define YYERROR_VERBOSE 0
+# define YYERROR_VERBOSE 1
 #endif
 
 /* Use api.header.include to #include this header
    instead of duplicating it here.  */
-#ifndef YY_YY_FORMLANG_TAB_H_INCLUDED
-# define YY_YY_FORMLANG_TAB_H_INCLUDED
+#ifndef YY_YY_PARSER_TAB_H_INCLUDED
+# define YY_YY_PARSER_TAB_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -175,12 +178,12 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 13 "formlang.y"
+#line 18 "parser.y"
 
     int num;
     char* str;
 
-#line 184 "formlang.tab.c"
+#line 187 "parser.tab.c"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -193,7 +196,7 @@ extern YYSTYPE yylval;
 
 int yyparse (void);
 
-#endif /* !YY_YY_FORMLANG_TAB_H_INCLUDED  */
+#endif /* !YY_YY_PARSER_TAB_H_INCLUDED  */
 
 
 
@@ -559,16 +562,16 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    35,    35,    42,    44,    48,    52,    53,    57,    63,
-      64,    68,    74,    75,    79,    98,    99,   100,   101,   102,
-     103,   104,   105,   106,   107,   110,   112,   116,   119,   124,
-     129,   134,   139,   144,   149,   154,   160,   161,   165,   166,
-     173,   175,   179,   183,   184,   188,   194,   202,   203,   204,
-     205,   206,   207
+       0,    39,    39,    46,    47,    51,    55,    56,    60,    66,
+      67,    71,    77,    78,    82,   103,   104,   105,   106,   107,
+     108,   109,   110,   111,   112,   115,   117,   121,   124,   129,
+     138,   143,   148,   153,   158,   163,   169,   170,   174,   175,
+     182,   184,   188,   192,   193,   197,   203,   211,   212,   213,
+     214,   215,   216
 };
 #endif
 
-#if YYDEBUG || YYERROR_VERBOSE || 0
+#if YYDEBUG || YYERROR_VERBOSE || 1
 /* YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
@@ -1420,39 +1423,41 @@ yyreduce:
   switch (yyn)
     {
   case 2:
-#line 35 "formlang.y"
+#line 39 "parser.y"
                                                                                   {
         printf("<!-- Form: %s -->\n", (yyvsp[-5].str));
         printf("<form>\n");
         printf("</form>\n");
     }
-#line 1430 "formlang.tab.c"
+#line 1433 "parser.tab.c"
     break;
 
   case 8:
-#line 57 "formlang.y"
+#line 60 "parser.y"
                                       {
         printf("<!-- %s: %s -->\n", (yyvsp[-3].str), (yyvsp[-1].str));
     }
-#line 1438 "formlang.tab.c"
+#line 1441 "parser.tab.c"
     break;
 
   case 11:
-#line 68 "formlang.y"
+#line 71 "parser.y"
                                                        {
         printf("<!-- Section: %s -->\n", (yyvsp[-3].str));
     }
-#line 1446 "formlang.tab.c"
+#line 1449 "parser.tab.c"
     break;
 
   case 14:
-#line 79 "formlang.y"
+#line 82 "parser.y"
                                                {
-        // Print label
+        strcpy(current_field_type, (yyvsp[-3].str));  // track type
+
         printf("<label for=\"%s\">%s</label>\n", (yyvsp[-2].str), (yyvsp[-2].str));
 
         if (strcmp((yyvsp[-3].str), "textarea") == 0) {
-            printf("<textarea name=\"%s\" %s></textarea>\n", (yyvsp[-2].str), attributes_buffer);
+            printf("<textarea name=\"%s\" %s>%s</textarea>\n", (yyvsp[-2].str), attributes_buffer, textarea_default);
+            textarea_default[0] = '\0';  // clear default after use
         } else if (strcmp((yyvsp[-3].str), "dropdown") == 0) {
             printf("<select name=\"%s\" %s>\n<option>Option1</option><option>Option2</option></select>\n", (yyvsp[-2].str), attributes_buffer);
         } else if (strcmp((yyvsp[-3].str), "radio") == 0) {
@@ -1461,229 +1466,233 @@ yyreduce:
             printf("<input type=\"%s\" name=\"%s\" %s>\n", (yyvsp[-3].str), (yyvsp[-2].str), attributes_buffer);
         }
 
-        strcpy(attributes_buffer, "");  // Reset buffer
+        strcpy(attributes_buffer, "");
     }
-#line 1467 "formlang.tab.c"
+#line 1472 "parser.tab.c"
     break;
 
   case 15:
-#line 98 "formlang.y"
+#line 103 "parser.y"
                 { (yyval.str) = "text"; }
-#line 1473 "formlang.tab.c"
+#line 1478 "parser.tab.c"
     break;
 
   case 16:
-#line 99 "formlang.y"
+#line 104 "parser.y"
                 { (yyval.str) = "textarea"; }
-#line 1479 "formlang.tab.c"
+#line 1484 "parser.tab.c"
     break;
 
   case 17:
-#line 100 "formlang.y"
+#line 105 "parser.y"
                 { (yyval.str) = "number"; }
-#line 1485 "formlang.tab.c"
+#line 1490 "parser.tab.c"
     break;
 
   case 18:
-#line 101 "formlang.y"
+#line 106 "parser.y"
                 { (yyval.str) = "email"; }
-#line 1491 "formlang.tab.c"
+#line 1496 "parser.tab.c"
     break;
 
   case 19:
-#line 102 "formlang.y"
+#line 107 "parser.y"
                 { (yyval.str) = "date"; }
-#line 1497 "formlang.tab.c"
+#line 1502 "parser.tab.c"
     break;
 
   case 20:
-#line 103 "formlang.y"
+#line 108 "parser.y"
                 { (yyval.str) = "checkbox"; }
-#line 1503 "formlang.tab.c"
+#line 1508 "parser.tab.c"
     break;
 
   case 21:
-#line 104 "formlang.y"
+#line 109 "parser.y"
                 { (yyval.str) = "dropdown"; }
-#line 1509 "formlang.tab.c"
+#line 1514 "parser.tab.c"
     break;
 
   case 22:
-#line 105 "formlang.y"
+#line 110 "parser.y"
                 { (yyval.str) = "radio"; }
-#line 1515 "formlang.tab.c"
+#line 1520 "parser.tab.c"
     break;
 
   case 23:
-#line 106 "formlang.y"
+#line 111 "parser.y"
                 { (yyval.str) = "password"; }
-#line 1521 "formlang.tab.c"
+#line 1526 "parser.tab.c"
     break;
 
   case 24:
-#line 107 "formlang.y"
+#line 112 "parser.y"
                 { (yyval.str) = "file"; }
-#line 1527 "formlang.tab.c"
+#line 1532 "parser.tab.c"
     break;
 
   case 27:
-#line 116 "formlang.y"
+#line 121 "parser.y"
              {
         strcat(attributes_buffer, " required");
     }
-#line 1535 "formlang.tab.c"
+#line 1540 "parser.tab.c"
     break;
 
   case 28:
-#line 119 "formlang.y"
+#line 124 "parser.y"
                             {
         char buffer[256];
-        sprintf(buffer, " pattern=%s", (yyvsp[0].str));  // already quoted
+        sprintf(buffer, " pattern=%s", (yyvsp[0].str));
         strcat(attributes_buffer, buffer);
     }
-#line 1545 "formlang.tab.c"
+#line 1550 "parser.tab.c"
     break;
 
   case 29:
-#line 124 "formlang.y"
+#line 129 "parser.y"
                            {
-        char buffer[256];
-        sprintf(buffer, " value=\"%s\"", (yyvsp[0].str));
-        strcat(attributes_buffer, buffer);
+        if (strcmp(current_field_type, "textarea") == 0) {
+            strcpy(textarea_default, (yyvsp[0].str));
+        } else {
+            char buffer[256];
+            sprintf(buffer, " value=\"%s\"", (yyvsp[0].str));
+            strcat(attributes_buffer, buffer);
+        }
     }
-#line 1555 "formlang.tab.c"
+#line 1564 "parser.tab.c"
     break;
 
   case 30:
-#line 129 "formlang.y"
+#line 138 "parser.y"
                         {
         char buffer[256];
         sprintf(buffer, " min=\"%d\"", (yyvsp[0].num));
         strcat(attributes_buffer, buffer);
     }
-#line 1565 "formlang.tab.c"
+#line 1574 "parser.tab.c"
     break;
 
   case 31:
-#line 134 "formlang.y"
+#line 143 "parser.y"
                         {
         char buffer[256];
         sprintf(buffer, " max=\"%d\"", (yyvsp[0].num));
         strcat(attributes_buffer, buffer);
     }
-#line 1575 "formlang.tab.c"
+#line 1584 "parser.tab.c"
     break;
 
   case 32:
-#line 139 "formlang.y"
+#line 148 "parser.y"
                          {
         char buffer[256];
         sprintf(buffer, " rows=\"%d\"", (yyvsp[0].num));
         strcat(attributes_buffer, buffer);
     }
-#line 1585 "formlang.tab.c"
+#line 1594 "parser.tab.c"
     break;
 
   case 33:
-#line 144 "formlang.y"
+#line 153 "parser.y"
                          {
         char buffer[256];
         sprintf(buffer, " cols=\"%d\"", (yyvsp[0].num));
         strcat(attributes_buffer, buffer);
     }
-#line 1595 "formlang.tab.c"
+#line 1604 "parser.tab.c"
     break;
 
   case 34:
-#line 149 "formlang.y"
+#line 158 "parser.y"
                            {
         char buffer[256];
         sprintf(buffer, " accept=%s", (yyvsp[0].str));
         strcat(attributes_buffer, buffer);
     }
-#line 1605 "formlang.tab.c"
+#line 1614 "parser.tab.c"
     break;
 
   case 35:
-#line 154 "formlang.y"
+#line 163 "parser.y"
                                                   {
-        // Optional: handle <option> list generation here
+        // Handle dropdown/radio options if needed
     }
-#line 1613 "formlang.tab.c"
+#line 1622 "parser.tab.c"
     break;
 
   case 38:
-#line 165 "formlang.y"
+#line 174 "parser.y"
            { (yyval.str) = (yyvsp[0].str); }
-#line 1619 "formlang.tab.c"
+#line 1628 "parser.tab.c"
     break;
 
   case 39:
-#line 166 "formlang.y"
+#line 175 "parser.y"
            {
         char temp[20];
         sprintf(temp, "%d", (yyvsp[0].num));
         (yyval.str) = strdup(temp);
     }
-#line 1629 "formlang.tab.c"
+#line 1638 "parser.tab.c"
     break;
 
   case 45:
-#line 188 "formlang.y"
+#line 197 "parser.y"
                                               {
         printf("<!-- Validation: if %s then error '%s' -->\n", (yyvsp[-4].str), (yyvsp[-1].str));
     }
-#line 1637 "formlang.tab.c"
+#line 1646 "parser.tab.c"
     break;
 
   case 46:
-#line 194 "formlang.y"
+#line 203 "parser.y"
                                          {
         char expr[256];
         sprintf(expr, "%s %s %s", (yyvsp[-2].str), (yyvsp[-1].str), (yyvsp[0].str));
         (yyval.str) = strdup(expr);
     }
-#line 1647 "formlang.tab.c"
+#line 1656 "parser.tab.c"
     break;
 
   case 47:
-#line 202 "formlang.y"
+#line 211 "parser.y"
         { (yyval.str) = "=="; }
-#line 1653 "formlang.tab.c"
+#line 1662 "parser.tab.c"
     break;
 
   case 48:
-#line 203 "formlang.y"
+#line 212 "parser.y"
         { (yyval.str) = "!="; }
-#line 1659 "formlang.tab.c"
+#line 1668 "parser.tab.c"
     break;
 
   case 49:
-#line 204 "formlang.y"
+#line 213 "parser.y"
         { (yyval.str) = "<="; }
-#line 1665 "formlang.tab.c"
+#line 1674 "parser.tab.c"
     break;
 
   case 50:
-#line 205 "formlang.y"
+#line 214 "parser.y"
         { (yyval.str) = ">="; }
-#line 1671 "formlang.tab.c"
+#line 1680 "parser.tab.c"
     break;
 
   case 51:
-#line 206 "formlang.y"
+#line 215 "parser.y"
         { (yyval.str) = "<"; }
-#line 1677 "formlang.tab.c"
+#line 1686 "parser.tab.c"
     break;
 
   case 52:
-#line 207 "formlang.y"
+#line 216 "parser.y"
         { (yyval.str) = ">"; }
-#line 1683 "formlang.tab.c"
+#line 1692 "parser.tab.c"
     break;
 
 
-#line 1687 "formlang.tab.c"
+#line 1696 "parser.tab.c"
 
       default: break;
     }
@@ -1915,16 +1924,15 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 211 "formlang.y"
+#line 219 "parser.y"
 
 
 int yyerror(const char *s) {
-    fprintf(stderr, "\n❌ Parse error: %s\n", s);
+    fprintf(stderr, "\nParse error: %s\n", s);
     return 1;
 }
 
-
 int main() {
-    printf("🚀 Parsing FormLang++ DSL...\n\n");
+    printf("Parsing FormLang++ DSL......\n\n");
     return yyparse();
 }

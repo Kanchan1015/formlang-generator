@@ -1,13 +1,18 @@
+%define parse.error verbose
+
 %{
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+extern int yylineno;
 
 int yylex(void);
 int yyerror(const char *s);
 
 char current_field_type[50];
 char attributes_buffer[1024];
+char textarea_default[256] = "";
 %}
 
 %union {
@@ -28,7 +33,6 @@ char attributes_buffer[1024];
 %type <str> comparison_operator
 %type <str> expression
 
-
 %%
 
 form:
@@ -40,7 +44,6 @@ form:
     ;
 
 optional_meta:
-    /* empty */
     | meta_section
     ;
 
@@ -77,11 +80,13 @@ field_definitions:
 
 field_definition:
     field_type IDENTIFIER attributes SEMICOLON {
-        // Print label
+        strcpy(current_field_type, $1);  // track type
+
         printf("<label for=\"%s\">%s</label>\n", $2, $2);
 
         if (strcmp($1, "textarea") == 0) {
-            printf("<textarea name=\"%s\" %s></textarea>\n", $2, attributes_buffer);
+            printf("<textarea name=\"%s\" %s>%s</textarea>\n", $2, attributes_buffer, textarea_default);
+            textarea_default[0] = '\0';  // clear default after use
         } else if (strcmp($1, "dropdown") == 0) {
             printf("<select name=\"%s\" %s>\n<option>Option1</option><option>Option2</option></select>\n", $2, attributes_buffer);
         } else if (strcmp($1, "radio") == 0) {
@@ -90,7 +95,7 @@ field_definition:
             printf("<input type=\"%s\" name=\"%s\" %s>\n", $1, $2, attributes_buffer);
         }
 
-        strcpy(attributes_buffer, "");  // Reset buffer
+        strcpy(attributes_buffer, "");
     }
     ;
 
@@ -118,13 +123,17 @@ attribute:
     }
     | PATTERN ASSIGN STRING {
         char buffer[256];
-        sprintf(buffer, " pattern=%s", $3);  // already quoted
+        sprintf(buffer, " pattern=%s", $3);
         strcat(attributes_buffer, buffer);
     }
     | DEFAULT ASSIGN value {
-        char buffer[256];
-        sprintf(buffer, " value=\"%s\"", $3);
-        strcat(attributes_buffer, buffer);
+        if (strcmp(current_field_type, "textarea") == 0) {
+            strcpy(textarea_default, $3);
+        } else {
+            char buffer[256];
+            sprintf(buffer, " value=\"%s\"", $3);
+            strcat(attributes_buffer, buffer);
+        }
     }
     | MIN ASSIGN NUMBER {
         char buffer[256];
@@ -152,7 +161,7 @@ attribute:
         strcat(attributes_buffer, buffer);
     }
     | OPTIONS ASSIGN LBRACKET value_list RBRACKET {
-        // Optional: handle <option> list generation here
+        // Handle dropdown/radio options if needed
     }
     ;
 
@@ -207,7 +216,6 @@ comparison_operator:
   | GT  { $$ = ">"; }
   ;
 
-
 %%
 
 int yyerror(const char *s) {
@@ -215,8 +223,7 @@ int yyerror(const char *s) {
     return 1;
 }
 
-
 int main() {
-    printf("Parsing FormLang++ DSL...\n\n");
+    printf("Parsing FormLang++ DSL......\n\n");
     return yyparse();
 }

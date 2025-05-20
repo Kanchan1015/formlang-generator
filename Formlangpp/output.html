@@ -1,0 +1,31 @@
+Parsing FormLang++ DSL......
+
+<!-- title: "User Registration" -->
+<!-- description: "Please fill all the details." -->
+<label for="name">name</label>
+<input type="text" name="name"  required pattern="^[A-Za-z ]+$">
+<label for="emailField">emailField</label>
+<input type="email" name="emailField"  required pattern="^\\S+@\\S+\\.\\S+$">
+<label for="age">age</label>
+<input type="number" name="age"  min="18">
+<label for="dob">dob</label>
+<input type="date" name="dob"  required>
+<label for="userPass">userPass</label>
+<input type="password" name="userPass"  required pattern="^[A-Za-z0-9]{6,}$">
+<label for="bio">bio</label>
+<textarea name="bio"  rows="4" cols="30" value=""Write about yourself...""></textarea>
+<label for="resume">resume</label>
+<input type="file" name="resume"  accept=".pdf,.docx" required>
+<!-- Section: personalInfo -->
+<label for="subscribe">subscribe</label>
+<input type="checkbox" name="subscribe"  value=""true"">
+<label for="gender">gender</label>
+<select name="gender"  required value=""male"">
+<option>Option1</option><option>Option2</option></select>
+<label for="contactMethod">contactMethod</label>
+<input type="radio" name="contactMethod"  required>
+<!-- Section: preferences -->
+<!-- Validation: if age < 18 then error '"You must be at least 18 years old."' -->
+<!-- Form: registrationForm -->
+<form>
+</form>

@@ -1,0 +1,26 @@
+form registrationForm {
+  meta
+    title = "User Registration";
+    description = "Please fill all the details.";
+
+  section personalInfo {
+    text name required pattern = "^[A-Za-z ]+$";
+    email emailField required pattern = "^\\S+@\\S+\\.\\S+$";
+    number age min = 18;
+    date dob required;
+    password userPass required pattern = "^[A-Za-z0-9]{6,}$";
+    textarea bio rows = 4 cols = 30 default = "Write about yourself...";
+    file resume accept = ".pdf,.docx" required;
+  }
+
+  section preferences {
+    checkbox subscribe default = "true";
+    dropdown gender required default = "male" options = ["male,female,other"];
+    radio contactMethod required options = ["email,phone,sms"];
+  }
+
+validate {
+  if age < 18 then error "You must be at least 18 years old.";
+}
+
+}
