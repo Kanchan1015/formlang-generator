@@ -1,0 +1,13 @@
+form Registration {
+  meta author = "KANCHAN";
+
+  section personal {
+    text name required;
+    number age min=0 max=120;
+    email contact pattern=".+@.+";
+  }
+
+  validate {
+    if age < 18 then error "Too young";
+  }
+}
