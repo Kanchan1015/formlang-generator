@@ -65,13 +65,6 @@ Test valid and invalid DSL forms:
 
 ---
 
-## Demo
-
-Demo video: demo.mp4 or YouTube link (if available)
-
----
-
 ## License & Attribution
 
-Developed as part of SE2062 – Programming Paradigms course.
 For academic use only.
